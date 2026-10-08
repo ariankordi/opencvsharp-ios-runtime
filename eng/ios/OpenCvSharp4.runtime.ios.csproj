@@ -21,7 +21,7 @@
     <PackageId>ariankordi.OpenCvSharp4.runtime.ios</PackageId>
     <Title>OpenCvSharp native bindings for iOS</Title>
     <Authors>ariankordi</Authors>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/ariankordi/opencvsharp-ios-runtime</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ariankordi/opencvsharp-ios-runtime.git</RepositoryUrl>
@@ -32,7 +32,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)../../LICENSE" Pack="true" PackagePath="" />
     <None Include="$(MSBuildThisFileDirectory)../../README.md" Pack="true" PackagePath="" />
 
     <!-- Placeholder so NuGet considers the package compatible with the app's target framework. -->
