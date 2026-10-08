@@ -7,6 +7,10 @@ name: Build-iOS
 on:
   workflow_dispatch:
     inputs:
+      version:
+        description: 'Package version (blank = NUGET_VERSION_PREFIX.run_number, e.g. 4.13.0.1 or 4.13.0.2-preview.1)'
+        type: string
+        default: ''
       publish_github:
         description: 'Push to GitHub Packages'
         type: boolean
@@ -99,7 +103,7 @@ jobs:
     - name: Pack NuGet
       run: |
         dotnet pack eng/ios/OpenCvSharp4.runtime.ios.csproj -c Release \
-          -p:Version=${{ env.NUGET_VERSION_PREFIX }}.${{ github.run_number }} \
+          -p:Version=${{ inputs.version || format('{0}.{1}', env.NUGET_VERSION_PREFIX, github.run_number) }} \
           -p:XcframeworkDir="$GITHUB_WORKSPACE/ios-out/OpenCvSharpExtern.xcframework" \
           -p:SymbolsProps="$GITHUB_WORKSPACE/ios-out/OpenCvSharpExtern.symbols.props" \
           -o nupkgs
