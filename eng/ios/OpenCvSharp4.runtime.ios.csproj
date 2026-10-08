@@ -19,14 +19,14 @@
     <NoWarn>$(NoWarn);NU5128;NU5100;NU5129</NoWarn>
 
     <PackageId>ariankordi.OpenCvSharp4.runtime.ios</PackageId>
-    <Title>OpenCvSharp4 runtime for iOS (static, arm64 device + simulator)</Title>
+    <Title>OpenCvSharp native bindings for iOS</Title>
     <Authors>ariankordi</Authors>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/ariankordi/opencvsharp-ios-runtime</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ariankordi/opencvsharp-ios-runtime.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>OpenCV OpenCvSharp OpenCvSharp4 ios maui</PackageTags>
-    <Description>Native OpenCvSharpExtern runtime for stock OpenCvSharp4 on iOS (core, imgproc, imgcodecs). Static xcframework for ios-arm64 and iossimulator-arm64, plus MSBuild logic that links it and registers the P/Invoke resolver and error handler. Reference alongside the unmodified OpenCvSharp4 package.</Description>
+    <Description>Internal implementation package for OpenCvSharp to work on ios-arm64 and iossimulator-arm64. Modules: core,imgproc,imgcodecs</Description>
     <Copyright>Copyright $([System.DateTime]::UtcNow.Year)</Copyright>
   </PropertyGroup>
 

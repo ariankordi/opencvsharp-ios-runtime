@@ -1,87 +1,40 @@
-# OpenCvSharp 4 Mini Runtime [![QQ](https://img.shields.io/badge/QQ_Group-579060605-52B6EF?style=social&logo=tencent-qq&logoColor=000&logoWidth=20)](https://jq.qq.com/?_wv=1027&k=K4fBqpyQ)
-[![Build-OpenCV](https://github.com/sdcb/opencvsharp-mini-runtime/actions/workflows/opencv.yml/badge.svg)](https://github.com/sdcb/opencvsharp-mini-runtime/actions/workflows/opencv.yml) [![Build-OpenCvSharp](https://github.com/sdcb/opencvsharp-mini-runtime/actions/workflows/opencvsharp.yml/badge.svg)](https://github.com/sdcb/opencvsharp-mini-runtime/actions/workflows/opencvsharp.yml) [![Test-OpenCvSharp](https://github.com/sdcb/opencvsharp-mini-runtime/actions/workflows/test-opencvsharp.yml/badge.svg)](https://github.com/sdcb/opencvsharp-mini-runtime/actions/workflows/test-opencvsharp.yml) [![Make-NuGet](https://github.com/sdcb/opencvsharp-mini-runtime/actions/workflows/make-nuget.yml/badge.svg)](https://github.com/sdcb/opencvsharp-mini-runtime/actions/workflows/make-nuget.yml)
+# OpenCvSharp4 iOS Runtime
 
-**English** | [简体中文](README_CN.md)
+Runtime package meant to be used for iOS compatibility to use OpenCvSharp in cross-platform .NET MAUI apps.
 
-Mini runtime that suitable for model inference in server. Current packages build `core`, `imgproc`, `imgcodecs`, and, since `4.13.0.45`, `dnn`.
+For other platforms including Android, see [sdcb/opencvsharp-mini-runtime](https://github.com/sdcb/opencvsharp-mini-runtime).
 
-`osx-arm64` is the only exception: it still ships `core`, `imgproc`, and `imgcodecs`, but excludes `dnn` because GitHub Actions macOS arm64 runners repeatedly stall during OpenCV DNN builds.
+Only "core" modules are included: `core,imgproc,imgcodecs`. See [build-ios.sh](opencvsharp-mini-runtime/eng/ios/build-ios.sh) for details. Feel free to make an issue or PR if you need more.
 
-Packages are all built & integration-tested by a fully automated CI/CD pipeline on GitHub, CICD code fully open source.
+## Usage
 
-### 📦  Maintained OpenCvSharp Mini-Runtime Matrix
+This package can be found on NuGet: [ariankordi.OpenCvSharp4.runtime.ios](https://www.nuget.org/packages/ariankordi.OpenCvSharp4.runtime.ios)
 
-| OS            | Package Id                                      | NuGet                                                                                                                                                                      | Compiler        | Mini-ABI        | Modules                         |
-| ------------- | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | --------------- | ------------------------------- |
-| Windows       | Sdcb.OpenCvSharp4.mini.runtime.win-x64          | [![NuGet](https://img.shields.io/nuget/v/Sdcb.OpenCvSharp4.mini.runtime.win-x64.svg)](https://www.nuget.org/packages/Sdcb.OpenCvSharp4.mini.runtime.win-x64)               | MSVC 17         | win-x64         | core, imgproc, imgcodecs, dnn   |
-|               | Sdcb.OpenCvSharp4.mini.runtime.win-x86          | [![NuGet](https://img.shields.io/nuget/v/Sdcb.OpenCvSharp4.mini.runtime.win-x86.svg)](https://www.nuget.org/packages/Sdcb.OpenCvSharp4.mini.runtime.win-x86)               | MSVC 17         | win-x86         | core, imgproc, imgcodecs, dnn   |
-|               | Sdcb.OpenCvSharp4.mini.runtime.win-arm64        | [![NuGet](https://img.shields.io/nuget/v/Sdcb.OpenCvSharp4.mini.runtime.win-arm64.svg)](https://www.nuget.org/packages/Sdcb.OpenCvSharp4.mini.runtime.win-arm64)           | MSVC 17         | win-arm64       | core, imgproc, imgcodecs, dnn   |
-| Linux (glibc) | Sdcb.OpenCvSharp4.mini.runtime.linux-x64        | [![NuGet](https://img.shields.io/nuget/v/Sdcb.OpenCvSharp4.mini.runtime.linux-x64.svg)](https://www.nuget.org/packages/Sdcb.OpenCvSharp4.mini.runtime.linux-x64)           | GCC 8.5.0       | glibc 2.28+     | core, imgproc, imgcodecs, dnn   |
-|               | Sdcb.OpenCvSharp4.mini.runtime.linux-arm64      | [![NuGet](https://img.shields.io/nuget/v/Sdcb.OpenCvSharp4.mini.runtime.linux-arm64.svg)](https://www.nuget.org/packages/Sdcb.OpenCvSharp4.mini.runtime.linux-arm64)       | GCC 8.5.0       | glibc 2.28+     | core, imgproc, imgcodecs, dnn   |
-| Linux (musl)  | Sdcb.OpenCvSharp4.mini.runtime.linux-musl-x64   | [![NuGet](https://img.shields.io/nuget/v/Sdcb.OpenCvSharp4.mini.runtime.linux-musl-x64.svg)](https://www.nuget.org/packages/Sdcb.OpenCvSharp4.mini.runtime.linux-musl-x64) | GCC 14.2.0      | musl 1.2 static | core, imgproc, imgcodecs, dnn   |
-|               | Sdcb.OpenCvSharp4.mini.runtime.linux-musl-arm64 | [![NuGet](https://img.shields.io/nuget/v/Sdcb.OpenCvSharp4.mini.runtime.linux-musl-arm64.svg)](https://www.nuget.org/packages/Sdcb.OpenCvSharp4.mini.runtime.linux-musl-arm64) | GCC 14.2.0   | musl 1.2 static | core, imgproc, imgcodecs, dnn   |
-| macOS         | Sdcb.OpenCvSharp4.mini.runtime.osx-x64          | [![NuGet](https://img.shields.io/nuget/v/Sdcb.OpenCvSharp4.mini.runtime.osx-x64.svg)](https://www.nuget.org/packages/Sdcb.OpenCvSharp4.mini.runtime.osx-x64)               | Xcode 16        | macOS 10.15+    | core, imgproc, imgcodecs, dnn   |
-|               | Sdcb.OpenCvSharp4.mini.runtime.osx-arm64        | [![NuGet](https://img.shields.io/nuget/v/Sdcb.OpenCvSharp4.mini.runtime.osx-arm64.svg)](https://www.nuget.org/packages/Sdcb.OpenCvSharp4.mini.runtime.osx-arm64)           | Xcode 16        | macOS 11+       | core, imgproc, imgcodecs        |
-| Android       | Sdcb.OpenCvSharp4.mini.runtime.android-x64      | [![NuGet](https://img.shields.io/nuget/v/Sdcb.OpenCvSharp4.mini.runtime.android-x64.svg)](https://www.nuget.org/packages/Sdcb.OpenCvSharp4.mini.runtime.android-x64)       | Clang (NDK r27) | API 24+, static | core, imgproc, imgcodecs, dnn   |
-|               | Sdcb.OpenCvSharp4.mini.runtime.android-arm64    | [![NuGet](https://img.shields.io/nuget/v/Sdcb.OpenCvSharp4.mini.runtime.android-arm64.svg)](https://www.nuget.org/packages/Sdcb.OpenCvSharp4.mini.runtime.android-arm64)   | Clang (NDK r27) | API 24+, static | core, imgproc, imgcodecs, dnn   |
+A csproj using OpenCvSharp4 on all major MAUI platforms can be structured like so:
 
-### 🧊 Deprecated Runtime Matrix
+```xml
+    <!-- OpenCvSharp4 managed assembly. -->
+    <PackageReference Include="OpenCvSharp4" Version="4.13.0.20260627" />
+    <!-- Runtime: iOS -->
+    <ItemGroup Condition="$(TargetFramework.Contains('-ios'))">
+      <PackageReference Include="ariankordi.OpenCvSharp4.iOS" Version="4.13.0.20261008" />
+    </ItemGroup>
+    <!-- Runtime: Android -->
+    <ItemGroup Condition="$(TargetFramework.Contains('-android'))">
+      <PackageReference Include="Sdcb.OpenCvSharp4.mini.runtime.android-arm64" Version="4.13.0.45" />
+      <PackageReference Include="Sdcb.OpenCvSharp4.mini.runtime.android-x64" Version="4.13.0.45" />
+    </ItemGroup>
+    <!-- Runtime: Windows -->
+    <ItemGroup Condition="$(TargetFramework.Contains('-windows'))">
+      <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.13.0.20260627" />
+    </ItemGroup>
+```
 
-These packages remain on NuGet for existing users, but are no longer actively built or validated by the current pipeline.
+**NOTE:** Only the arm64 Simulator slice is built, and x64 Simulator is not supported.
 
-| OS / Baseline  | Package Id Prefix                                        | Last Intended Use                         | Recommended Replacement                  |
-| -------------- | -------------------------------------------------------- | ----------------------------------------- | ---------------------------------------- |
-| CentOS 7       | Sdcb.OpenCvSharp4.mini.runtime.centos.7-*                | glibc 2.17 era systems                    | linux-x64 / linux-arm64                  |
-| Ubuntu 22.04   | Sdcb.OpenCvSharp4.mini.runtime.ubuntu.22.04-*            | glibc 2.35-specific builds                | linux-x64 / linux-arm64                  |
-| Ubuntu 24.04   | Sdcb.OpenCvSharp4.mini.runtime.ubuntu.24.04-*            | experimental newer-glibc builds           | linux-x64 / linux-arm64                  |
-| Windows 11     | Sdcb.OpenCvSharp4.mini.runtime.win11-x64                 | Windows 11-specific label experiment      | win-x64                                  |
-| macOS 15       | Sdcb.OpenCvSharp4.mini.runtime.osx.15-arm64              | macOS 15-specific label experiment        | osx-arm64                                |
-| RHEL 9         | Sdcb.OpenCvSharp4.mini.runtime.rhel9-*                   | planned but not maintained separately     | linux-x64 / linux-arm64                  |
+If this leads to a failure in your project build, please make an issue or PR.
 
----
-
-## 🔍 End-to-end automated tests
-* 11 package build/link smoke tests
-* 11 native host runtime tests
-* 36 Docker container compatibility tests
-* Android-x64 emulator runtime test
-
-Assurance: every package runs reliably on its target platform.
-
----
-
-## 🖥️ Platform Quick-Start
-
-### Windows
-• Use **win-x64** (most PCs) or **win-x86** (legacy).  
-• Tested on Windows Server 2022 & 2025; older versions should work thanks to Windows’ strong ABI compatibility.  
-• **win-arm64** is now available and verified for Windows on ARM devices.
-
-### Linux (glibc)
-The maintained **linux-x64 / arm64** packages are built on the RHEL 8 baseline and **dynamically** link `libstdc++.so.6` + `libgcc_s.so.1`.
-
-They run on glibc 2.28+ distributions, including RHEL 8+, Debian 10+, Ubuntu 20.04+, openEuler 20.03-lts, Deepin, and newer systems.
-
-### Linux (musl)
-Packages **linux-musl-x64 / arm64** are built on Alpine 3.22 and **statically** link `libstdc++` & `libgcc`.  
-Confirmed to run on Alpine 3.12 (musl 1.1.24) — even routers running OpenWrt!
-
-### Android
-**android-x64 / arm64** compiled with Android NDK r27, API 24.  
-`libstdc++` is statically linked, so drop-in ready for any device running Android 7.0+.
-
-### macOS
-• **osx-x64** for Intel Macs.  
-• **osx-arm64** for Apple Silicon (M1 → M4).  
-Both are tested on macOS 15 runners. `osx-arm64` currently excludes `dnn` because OpenCV DNN builds repeatedly stall on GitHub Actions macOS arm64 infrastructure.
-
----
-
-## ⭐ How You Can Help
-If these runtimes make your life easier, please…
-
-1. **Star** the repo: https://github.com/sdcb/opencvsharp-mini-runtime  
-2. Consider a small **donation** – let me know your special needs and I’ll try to publish a build that fits.
-
-Thanks for using OpenCvSharp mini-runtime and happy hacking!  
-— @Sdcb
+## Acknowledgements
+* This repo is almost entirely made by Claude Code. ~~sorry~~
+* [shimat/OpenCvSharp](https://github.com/shimat/opencvsharp/tree/4.13.0.20260627)
+* [sdcb/opencvsharp-mini-runtime](https://github.com/sdcb/opencvsharp-mini-runtime) (this repo is a fork of that)
