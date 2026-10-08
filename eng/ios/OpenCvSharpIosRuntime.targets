@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Runtime-only iOS support for stock OpenCvSharp4: no changes to the managed assembly.
+  Import from an iOS app project. Assumes upstream OpenCvSharp4 is referenced.
+  Contents: static xcframework, interpreter fallback, resolver + error handler init, exported symbols.
+-->
+<Project>
+  <PropertyGroup Condition="$(TargetFramework.Contains('-ios'))">
+    <!-- NativeMethods' static constructor marshals a lambda to native code, which needs the interpreter under Mono
+         full AOT. "-all" enables the interpreter but still AOT-compiles everything. Respect an explicit choice. -->
+    <MtouchInterpreter Condition="'$(MtouchInterpreter)' == ''">-all</MtouchInterpreter>
+  </PropertyGroup>
+
+  <ItemGroup Condition="$(TargetFramework.Contains('-ios'))">
+    <!-- Not ForceLoad: the symbol list below pulls in what is needed. -->
+    <NativeReference Include="$(OpenCvSharpIosXcframework)">
+      <Kind>Static</Kind>
+      <SmartLink>False</SmartLink>
+    </NativeReference>
+
+    <!-- The init file sits in a folder the SDK's default glob would otherwise compile on every target. -->
+    <Compile Remove="$(MSBuildThisFileDirectory)**/*.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)OpenCvSharpIosInit.cs" Condition="'$(OutputType)' == 'Exe'" />
+  </ItemGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)OpenCvSharpExtern.symbols.props" Condition="$(TargetFramework.Contains('-ios'))" />
+</Project>

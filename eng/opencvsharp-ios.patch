@@ -1,0 +1,31 @@
+Build OpenCvSharpExtern as a static archive on iOS.
+
+Apply AFTER eng/opencvsharp.patch (sdcb/opencvsharp-mini-runtime): git apply eng/opencvsharp-ios.patch
+Both patches target the same file, and this one has been verified to apply on top of
+shimat/opencvsharp tags 4.13.0.20260602 and 4.13.0.20260627.
+
+Origin: extracted from the iOS branch of ariankordi/OpenCvSharp.iOS (commit 7cb35b70 and later),
+changes by Arian Kordi('s Claude agent). Unlike eng/opencvsharp.patch this is not from sdcb.
+diff --git a/src/OpenCvSharpExtern/CMakeLists.txt b/src/OpenCvSharpExtern/CMakeLists.txt
+index 5614c705..6c67fff7 100644
+--- a/src/OpenCvSharpExtern/CMakeLists.txt
++++ b/src/OpenCvSharpExtern/CMakeLists.txt
+@@ -55,12 +55,17 @@ if(OpenCV_FOUND)
+ 	if(EMSCRIPTEN)
+ 		# TODO: replace path
+ 		add_library(OpenCvSharpExtern STATIC ${OPENCVSHARP_FILES} ${WASM_LIB})
++	elseif(IOS)
++		# iOS requires a static archive: the App Store forbids loose dylibs and
++		# DllImport resolves against the statically-linked main executable at runtime.
++		# OpenCV libs are linked by the consuming app via the xcframework, not here.
++		add_library(OpenCvSharpExtern STATIC ${OPENCVSHARP_FILES})
+ 	else()
+ 		add_library(OpenCvSharpExtern SHARED ${OPENCVSHARP_FILES})
+ 		target_link_libraries(OpenCvSharpExtern ${OpenCV_LIBRARIES})
+ 	endif()
+ 
+-	if(Iconv_FOUND)
++	if(Iconv_FOUND AND NOT IOS AND NOT EMSCRIPTEN)
+ 		target_link_libraries(OpenCvSharpExtern Iconv::Iconv)
+ 	endif()
+ 
