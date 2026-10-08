@@ -11,6 +11,12 @@
     <MtouchInterpreter Condition="'$(MtouchInterpreter)' == ''">-all</MtouchInterpreter>
   </PropertyGroup>
 
+  <PropertyGroup Condition="$(TargetFramework.Contains('-ios'))">
+    <!-- Packaged layout: this file lives in build/ and the xcframework sits one level up. A project that
+         imports this file from a source checkout sets OpenCvSharpIosXcframework itself. -->
+    <OpenCvSharpIosXcframework Condition="'$(OpenCvSharpIosXcframework)' == ''">$(MSBuildThisFileDirectory)../OpenCvSharpExtern.xcframework</OpenCvSharpIosXcframework>
+  </PropertyGroup>
+
   <ItemGroup Condition="$(TargetFramework.Contains('-ios'))">
     <!-- Not ForceLoad: the symbol list below pulls in what is needed. -->
     <NativeReference Include="$(OpenCvSharpIosXcframework)">

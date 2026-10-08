@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Packs the iOS runtime for STOCK OpenCvSharp4 (no managed assembly inside), analogous to the
+    Sdcb.OpenCvSharp4.mini.runtime.* packages (https://github.com/sdcb/opencvsharp-mini-runtime, Apache-2.0).
+    Nothing is compiled here; the project only exists so that `dotnet pack` can assemble the package.
+
+    Inputs (pass with -p:):
+      XcframeworkDir   OpenCvSharpExtern.xcframework produced by build-ios.sh.
+      SymbolsProps     OpenCvSharpExtern.symbols.props produced by build-ios.sh.
+      Version          Package version.
+  -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <!-- NU5128: lib/ holds only a placeholder, intentionally. -->
+    <NoWarn>$(NoWarn);NU5128;NU5100;NU5129</NoWarn>
+
+    <PackageId>ariankordi.OpenCvSharp4.runtime.ios</PackageId>
+    <Title>OpenCvSharp4 runtime for iOS (static, arm64 device + simulator)</Title>
+    <Authors>ariankordi</Authors>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/ariankordi/opencvsharp-ios-runtime</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ariankordi/opencvsharp-ios-runtime.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>OpenCV OpenCvSharp OpenCvSharp4 ios maui</PackageTags>
+    <Description>Native OpenCvSharpExtern runtime for stock OpenCvSharp4 on iOS (core, imgproc, imgcodecs). Static xcframework for ios-arm64 and iossimulator-arm64, plus MSBuild logic that links it and registers the P/Invoke resolver and error handler. Reference alongside the unmodified OpenCvSharp4 package.</Description>
+    <Copyright>Copyright $([System.DateTime]::UtcNow.Year)</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Placeholder so NuGet considers the package compatible with the app's target framework. -->
+    <None Include="$(MSBuildThisFileDirectory)_._" Pack="true" PackagePath="lib/netstandard2.0/_._" />
+
+    <None Include="$(XcframeworkDir)/**" Pack="true" PackagePath="OpenCvSharpExtern.xcframework/%(RecursiveDir)%(Filename)%(Extension)" />
+
+    <!-- A TFM-less build/ file named after the package id is imported automatically for the referencing project.
+         buildTransitive/ is deliberately not used: next to build/ it risks a double import (duplicate
+         NativeReference and Compile items). The symbols props is imported explicitly by the targets. -->
+    <None Include="$(MSBuildThisFileDirectory)OpenCvSharpIosRuntime.targets" Pack="true" PackagePath="build/$(PackageId).targets" />
+    <None Include="$(MSBuildThisFileDirectory)OpenCvSharpIosInit.cs" Pack="true" PackagePath="build/OpenCvSharpIosInit.cs" />
+    <None Include="$(SymbolsProps)" Pack="true" PackagePath="build/OpenCvSharpExtern.symbols.props" />
+  </ItemGroup>
+</Project>

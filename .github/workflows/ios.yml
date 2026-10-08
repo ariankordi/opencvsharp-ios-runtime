@@ -1,0 +1,127 @@
+name: Build-iOS
+
+# iOS runtime for stock OpenCvSharp4. Structure adapted from sdcb/opencvsharp-mini-runtime
+# (Apache-2.0, https://github.com/sdcb/opencvsharp-mini-runtime): upstream OpenCvSharp is checked out at a pinned
+# tag and patched with eng/opencvsharp.patch (sdcb's) + eng/opencvsharp-ios.patch (ours).
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish_github:
+        description: 'Push to GitHub Packages'
+        type: boolean
+        default: false
+      publish_nuget:
+        description: 'Push to NuGet.org'
+        type: boolean
+        default: false
+
+env:
+  OPENCV_VERSION: 4.13.0
+  # Native tag. Matches sdcb's pin: eng/opencvsharp.patch does not apply to 4.13.0.20260627 (upstream rewrote the
+  # APPLE block in OpenCvSharpExtern/CMakeLists.txt). The native entry points are identical between the two tags.
+  OPENCVSHARP_VERSION: 4.13.0.20260602
+  NUGET_VERSION_PREFIX: 4.13.0
+
+# packages: write is required for `dotnet nuget push` to GitHub Packages with GITHUB_TOKEN.
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    name: Build iOS runtime
+    runs-on: macos-15
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    - name: Checkout this repo
+      uses: actions/checkout@v6
+
+    - name: Checkout OpenCV
+      uses: actions/checkout@v6
+      with:
+        repository: opencv/opencv
+        ref: ${{ env.OPENCV_VERSION }}
+        path: opencv
+        fetch-depth: 1
+
+    - name: Checkout OpenCvSharp
+      uses: actions/checkout@v6
+      with:
+        repository: shimat/opencvsharp
+        ref: ${{ env.OPENCVSHARP_VERSION }}
+        path: opencvsharp
+        fetch-depth: 1
+
+    # .NET 10 is needed to run eng/ios/pinvokes.cs as a file-based app.
+    - name: Install .NET
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Install cmake and ninja
+      run: brew install cmake ninja
+
+    # The managed P/Invoke list comes from the upstream sources themselves, never from a published binary.
+    - name: List managed P/Invoke entry points
+      run: |
+        dotnet build opencvsharp/src/OpenCvSharp/OpenCvSharp.csproj -f net8.0 -c Release
+        dotnet run eng/ios/pinvokes.cs -- \
+          opencvsharp/src/OpenCvSharp/bin/Release/net8.0/OpenCvSharp.dll OpenCvSharpExtern > managed-symbols.txt
+        echo "Managed entry points: $(wc -l < managed-symbols.txt)"
+
+    # OpenCV dominates the build time. Its configuration lives in build-ios.sh, so the script hash is in the key.
+    - name: Cache OpenCV
+      id: opencv-cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ios-out/opencv-device
+          ios-out/opencv-simulator
+        key: opencv-ios-${{ env.OPENCV_VERSION }}-${{ hashFiles('eng/ios/build-ios.sh') }}
+
+    - name: Build xcframework
+      run: |
+        REUSE=()
+        if [[ "${{ steps.opencv-cache.outputs.cache-hit }}" == "true" ]]; then
+          REUSE=(--opencv-device-prefix ios-out/opencv-device --opencv-simulator-prefix ios-out/opencv-simulator)
+        fi
+        ./eng/ios/build-ios.sh \
+          --opencv-src opencv \
+          --opencvsharp-src opencvsharp \
+          --out ios-out \
+          --managed-symbols managed-symbols.txt \
+          ${REUSE[@]+"${REUSE[@]}"}
+
+    - name: Pack NuGet
+      run: |
+        dotnet pack eng/ios/OpenCvSharp4.runtime.ios.csproj -c Release \
+          -p:Version=${{ env.NUGET_VERSION_PREFIX }}.${{ github.run_number }} \
+          -p:XcframeworkDir="$GITHUB_WORKSPACE/ios-out/OpenCvSharpExtern.xcframework" \
+          -p:SymbolsProps="$GITHUB_WORKSPACE/ios-out/OpenCvSharpExtern.symbols.props" \
+          -o nupkgs
+        ls -l nupkgs
+
+    - name: Upload nupkg
+      uses: actions/upload-artifact@v7
+      with:
+        name: nuget-ios
+        path: nupkgs/*.nupkg
+        if-no-files-found: error
+
+    - name: Push to GitHub Packages
+      if: ${{ inputs.publish_github }}
+      run: |
+        dotnet nuget push nupkgs/*.nupkg \
+          --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+          --api-key "${{ secrets.GITHUB_TOKEN }}" --skip-duplicate
+
+    - name: Push to NuGet.org
+      if: ${{ inputs.publish_nuget }}
+      run: |
+        dotnet nuget push nupkgs/*.nupkg \
+          --source https://api.nuget.org/v3/index.json \
+          --api-key "${{ secrets.NUGET_ORG_API_KEY }}" --skip-duplicate
